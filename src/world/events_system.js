@@ -4,6 +4,9 @@
  */
 
 const EventSystem = {
+    // id шаблона последнего сгенерированного события (чтобы не повторяться)
+    lastEventId: null,
+
     // Шаблоны событий по категориям
     TEMPLATES: {
         // === ВСТРЕЧИ С NPC ===
@@ -202,16 +205,25 @@ const EventSystem = {
             return this.getDefaultEvent(ctx);
         }
 
+        // Не повторять шаблон предыдущего события
+        let pool = candidates;
+        if (candidates.length > 1 && this.lastEventId) {
+            const filtered = candidates.filter(c => c.id !== this.lastEventId);
+            if (filtered.length > 0) pool = filtered;
+        }
+
         // Взвешенный выбор
-        const totalWeight = candidates.reduce((sum, c) => sum + (c.weight || 10), 0);
+        const totalWeight = pool.reduce((sum, c) => sum + (c.weight || 10), 0);
         let roll = Math.random() * totalWeight;
-        for (const candidate of candidates) {
+        for (const candidate of pool) {
             roll -= (candidate.weight || 10);
             if (roll <= 0) {
+                this.lastEventId = candidate.id;
                 return candidate.generate(ctx);
             }
         }
-        return candidates[0].generate(ctx);
+        this.lastEventId = pool[0].id;
+        return pool[0].generate(ctx);
     },
 
     /**
