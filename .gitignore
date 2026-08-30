@@ -1,0 +1,10 @@
+# OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editors / misc
+.vscode/
+.idea/
+*.log
+node_modules/

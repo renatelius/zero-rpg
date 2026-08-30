@@ -1,0 +1,88 @@
+/* ===== Eastern Theme — Decorative Overlays ===== */
+
+/* Background pattern */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(139, 32, 32, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(42, 80, 128, 0.06) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 80%, rgba(201, 168, 76, 0.04) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+#app { position: relative; z-index: 1; }
+
+/* Decorative corners for panels */
+.fate-panel::before,
+.fate-panel::after {
+    content: '◈';
+    position: absolute;
+    color: var(--border-gold);
+    opacity: 0.4;
+    font-size: 1.2rem;
+}
+.fate-panel { position: relative; }
+.fate-panel::before { top: 5px; left: 8px; }
+.fate-panel::after { bottom: 5px; right: 8px; }
+
+/* Gold separator */
+.gold-separator {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+    margin: 20px 0;
+}
+
+/* Scroll animation for text */
+.scene-text {
+    position: relative;
+}
+
+/* Glowing text for important words */
+.text-golden {
+    color: var(--accent-gold);
+    text-shadow: 0 0 8px rgba(212, 168, 67, 0.4);
+}
+
+.text-danger {
+    color: var(--danger);
+    text-shadow: 0 0 6px rgba(204, 51, 51, 0.3);
+}
+
+.text-spirit {
+    color: #6cb4ee;
+    text-shadow: 0 0 6px rgba(108, 180, 238, 0.3);
+}
+
+/* Element colors */
+.elem-metal { background: rgba(192, 192, 192, 0.2); color: #c0c0c0; border: 1px solid #c0c0c0; }
+.elem-wood { background: rgba(39, 174, 96, 0.2); color: #27ae60; border: 1px solid #27ae60; }
+.elem-water { background: rgba(41, 128, 185, 0.2); color: #2980b9; border: 1px solid #2980b9; }
+.elem-fire { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; }
+.elem-earth { background: rgba(212, 160, 23, 0.2); color: #d4a017; border: 1px solid #d4a017; }
+.elem-ice { background: rgba(174, 214, 241, 0.2); color: #aed6f1; border: 1px solid #aed6f1; }
+.elem-lightning { background: rgba(142, 68, 173, 0.2); color: #8e44ad; border: 1px solid #8e44ad; }
+.elem-wind { background: rgba(133, 193, 233, 0.2); color: #85c1e9; border: 1px solid #85c1e9; }
+.elem-darkness { background: rgba(44, 62, 80, 0.4); color: #7f8c8d; border: 1px solid #5d6d7e; }
+.elem-light { background: rgba(247, 220, 111, 0.2); color: #f7dc6f; border: 1px solid #f7dc6f; }
+.elem-space { background: rgba(27, 38, 49, 0.4); color: #aab7b8; border: 1px solid #5d6d7e; }
+.elem-time { background: rgba(125, 60, 152, 0.2); color: #bb8fce; border: 1px solid #7d3c98; }
+.elem-chaos { background: linear-gradient(135deg, rgba(231,76,60,0.2), rgba(41,128,185,0.2)); color: #ecf0f1; border: 1px solid #bdc3c7; }
+.elem-none { background: rgba(100,100,100,0.2); color: #999; border: 1px solid #555; }
+
+/* Pulse animation for rare items */
+@keyframes goldPulse {
+    0%, 100% { box-shadow: 0 0 5px rgba(201, 168, 76, 0.2); }
+    50% { box-shadow: 0 0 15px rgba(201, 168, 76, 0.5); }
+}
+
+.pulse-gold {
+    animation: goldPulse 2s infinite;
+}
+
+/* Screen transition */
+.screen.fade-in {
+    animation: fadeInUp 0.6s ease forwards;
+}

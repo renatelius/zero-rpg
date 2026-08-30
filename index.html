@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero RPG — Путь Культивации</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/eastern-theme.css">
+    <link rel="stylesheet" href="css/combat.css">
+    <link rel="stylesheet" href="css/graphics.css">
+    <link rel="stylesheet" href="css/crafting.css">
+    <link rel="stylesheet" href="css/techniques.css">
+    <style>
+        /* Дополнительные стили для культивации */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1.0; }
+        }
+        .hud-cultivation-path { padding: 2px 0; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Экран загрузки -->
+        <div id="title-screen" class="screen active">
+            <div class="title-container">
+                <h1 class="title-text">零</h1>
+                <h2 class="subtitle-text">ZERO RPG</h2>
+                <p class="tagline">Путь к Бессмертию начинается с нуля</p>
+                <div class="title-buttons">
+                    <button id="btn-new-game" class="btn-eastern">新游戏 — Новая Игра</button>
+                    <button id="btn-load-game" class="btn-eastern btn-secondary">继续 — Продолжить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Экран создания персонажа -->
+        <div id="creation-screen" class="screen">
+            <div class="creation-container">
+                <h2 class="section-title">命运之轮 — Колесо Судьбы</h2>
+                <div class="creation-grid">
+                    <!-- Левая панель: ввод -->
+                    <div class="creation-left">
+                        <div class="form-group">
+                            <label>姓名 — Имя:</label>
+                            <input type="text" id="char-name" placeholder="Введите имя героя..." maxlength="20">
+                        </div>
+                        <div class="form-group">
+                            <label>性别 — Пол:</label>
+                            <div class="gender-select">
+                                <button class="btn-gender active" data-gender="male">男 — Мужской</button>
+                                <button class="btn-gender" data-gender="female">女 — Женский</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>属性 — Характеристики:</label>
+                            <div id="stats-display" class="stats-grid"></div>
+                        </div>
+                        <div class="creation-buttons">
+                            <button id="btn-reroll" class="btn-eastern btn-small">🎲 Перебросить</button>
+                            <button id="btn-start" class="btn-eastern" disabled>踏上征途 — Начать Путь</button>
+                        </div>
+                    </div>
+                    <!-- Правая панель: судьба -->
+                    <div class="creation-right">
+                        <div id="fate-display" class="fate-panel"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Экран боя -->
+        <div id="combat-screen" class="screen"></div>
+
+        <!-- Игровой экран -->
+        <div id="game-screen" class="screen">
+            <div class="game-layout">
+                <div class="narrative-panel">
+                    <div id="scene-text" class="scene-text"></div>
+                    <div id="choices-container" class="choices-container"></div>
+                </div>
+                <aside id="hud-panel" class="hud-panel">
+                    <div id="hud-content"></div>
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <!-- === СКРИПТЫ (порядок загрузки КРИТИЧЕН!) === -->
+    
+    <!-- 1. Ядро: State -->
+    <script src="src/state.js"></script>
+    
+    <!-- 2. Персонаж -->
+    <script src="src/character/spirit_roots.js"></script>
+    <script src="src/character/physique.js"></script>
+    <script src="src/character/traits.js"></script>
+    <script src="src/character/origin.js"></script>
+    <script src="src/character/stats.js"></script>
+    <script src="src/character/creation.js"></script>
+    
+    <!-- 3. Культивация -->
+    <script src="src/cultivation/paths.js"></script>
+    <script src="src/cultivation/sublevels.js"></script>
+    <script src="src/cultivation/synergy.js"></script>
+    <script src="src/cultivation/breakthrough.js"></script>
+    <script src="src/cultivation/events.js"></script>
+    
+    <!-- 4. Боевая система -->
+    <script src="src/combat/elements.js"></script>
+    <script src="src/combat/tension.js"></script>
+    <script src="src/combat/actions.js"></script>
+    <script src="src/combat/enemies.js"></script>
+    <script src="src/combat/engine.js"></script>
+    
+    <!-- 5. Техники -->
+    <script src="src/techniques/technique_data.js"></script>
+    <script src="src/techniques/technique_system.js"></script>
+    <script src="src/techniques/technique_encounters.js"></script>
+    
+    <!-- 6. Экономика и профессии -->
+    <script src="src/economy/inventory.js"></script>
+    <script src="src/economy/market.js"></script>
+    <script src="src/professions/professions.js"></script>
+    <script src="src/professions/alchemy.js"></script>
+    <script src="src/professions/smithing.js"></script>
+    <script src="src/professions/talismans.js"></script>
+    <script src="src/professions/crafting_ui.js"></script>
+    
+    <!-- 7. Живой мир -->
+    <script src="src/world/time.js"></script>
+    <script src="src/world/locations.js"></script>
+    <script src="src/world/npc_system.js"></script>
+    <script src="src/world/sects.js"></script>
+    <script src="src/world/sect_membership.js"></script>
+    <script src="src/world/sect_events.js"></script>
+    <script src="src/world/events_system.js"></script>
+    <script src="src/world/world_engine.js"></script>
+    
+    <!-- 8. Социальные системы -->
+    <script src="src/social/relationships.js"></script>
+    <script src="src/social/interactions.js"></script>
+    <script src="src/social/companions.js"></script>
+    <script src="src/social/master_disciple.js"></script>
+    <script src="src/social/romance.js"></script>
+    <script src="src/social/social_events.js"></script>
+    
+    <!-- 9. Нарратив и UI -->
+    <script src="src/narrative/scene_engine.js"></script>
+    <script src="src/narrative/conditions.js"></script>
+    <script src="src/ui/graphics.js"></script>
+    <script src="src/ui/hud.js"></script>
+    <script src="src/ui/techniques_ui.js"></script>
+    
+    <!-- 10. Главный контроллер (определяет App) -->
+    <script src="src/main.js"></script>
+    <!-- 11. Игровой цикл (ПОСЛЕ main.js, т.к. использует App) -->
+    <script src="src/world/game_loop.js"></script>
+    
+    <!-- Старые данные глав (legacy, для обратной совместимости) -->
+    <!-- <script src="data/chapter1/arc1_village.js"></script> -->
+    <!-- <script src="data/chapter1/arc2_road.js"></script> -->
+    <!-- <script src="data/chapter1/arc3_trial.js"></script> -->
+    <!-- <script src="data/chapter1/index.js"></script> -->
+</body>
+</html>

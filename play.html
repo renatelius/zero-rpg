@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>零 Zero RPG — Путь Культивации</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; background:#0a0a14; color:#e0d8c8; font-family:system-ui,-apple-system,sans-serif; overflow:hidden; }
+.screen { display:none; width:100%; height:100%; position:absolute; top:0; left:0; }
+.screen.active { display:flex; }
+
+/* === ТИТУЛЬНЫЙ === */
+#title-screen { flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a14 70%); }
+#title-screen h1 { font-size:120px; color:#c9a44c; text-shadow:0 0 40px rgba(201,164,76,0.3); }
+#title-screen h2 { font-size:28px; color:#888; letter-spacing:12px; margin:10px 0 8px; }
+#title-screen p { color:#666; margin-bottom:30px; font-style:italic; }
+.btn { padding:12px 32px; margin:6px; border:1px solid #c9a44c; background:#8b0000; color:#e0d8c8; font-size:16px; cursor:pointer; border-radius:4px; transition:all 0.2s; }
+.btn:hover { background:#a01010; transform:scale(1.02); }
+.btn:disabled { opacity:0.4; cursor:default; transform:none; }
+.btn-sm { padding:8px 16px; font-size:13px; }
+.btn-secondary { background:#222; }
+.btn-secondary:hover { background:#333; }
+
+/* === СОЗДАНИЕ === */
+#create-screen { flex-direction:column; padding:30px 40px; overflow-y:auto; }
+#create-screen h2 { color:#c9a44c; text-align:center; margin-bottom:20px; font-size:24px; }
+.create-grid { display:grid; grid-template-columns:1fr 1fr; gap:30px; max-width:900px; margin:0 auto; }
+.form-group { margin-bottom:14px; }
+.form-group label { display:block; color:#999; margin-bottom:4px; font-size:13px; }
+.form-group input { width:100%; padding:10px; background:#1a1a2e; border:1px solid #444; color:#e0d8c8; font-size:15px; border-radius:4px; }
+.gender-btns { display:flex; gap:8px; }
+.gender-btns button { flex:1; padding:8px; background:#1a1a2e; border:1px solid #444; color:#888; cursor:pointer; border-radius:4px; }
+.gender-btns button.active { border-color:#c9a44c; color:#c9a44c; background:#1a1a28; }
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.stat-item { display:flex; justify-content:space-between; padding:6px 10px; background:#12121e; border:1px solid #333; border-radius:4px; font-size:13px; }
+.stat-val { color:#c9a44c; font-weight:bold; }
+.fate-section { margin-bottom:12px; padding:10px; background:#12121e; border:1px solid #333; border-radius:6px; }
+.fate-label { color:#c9a44c; font-size:11px; text-transform:uppercase; margin-bottom:4px; }
+.fate-value { font-size:14px; }
+.elem-badge { display:inline-block; padding:2px 8px; border-radius:3px; font-size:12px; margin:2px; border:1px solid #555; }
+
+/* === ИГРОВОЙ ЭКРАН === */
+#game-screen { flex-direction:column; }
+.speed-bar { display:flex; justify-content:center; gap:6px; padding:8px; background:#0d0d18; border-bottom:1px solid #222; z-index:10; }
+.speed-bar button { padding:5px 14px; background:#1a1a2e; border:1px solid #444; color:#888; cursor:pointer; border-radius:4px; font-size:13px; }
+.speed-bar button.active { background:#8b0000; border-color:#c9a44c; color:#fff; }
+.game-body { display:flex; flex:1; overflow:hidden; }
+.log-panel { flex:7; padding:16px; overflow-y:auto; border-right:1px solid #222; }
+.log-entry { padding:4px 0; font-size:13px; line-height:1.5; border-bottom:1px solid #111; color:#bbb; }
+.log-entry.important { color:#c9a44c; font-weight:bold; }
+.log-entry.combat { color:#e74c3c; }
+.log-entry.breakthrough { color:#f1c40f; font-size:14px; font-weight:bold; background:#1a1a00; padding:6px 8px; border-radius:4px; margin:4px 0; }
+.log-entry.choice-event { color:#9b59b6; font-size:14px; background:#1a0a2e; padding:8px; border-radius:6px; margin:6px 0; border:1px solid #6a3d9a; }
+.choice-btn { display:block; width:100%; text-align:left; padding:10px 14px; margin:4px 0; background:#1a1a2e; border:1px solid #555; color:#e0d8c8; cursor:pointer; border-radius:4px; font-size:14px; }
+.choice-btn:hover { border-color:#c9a44c; background:#252540; }
+.hud-panel { flex:3; padding:12px; overflow-y:auto; background:#0d0d16; font-size:12px; min-width:220px; }
+.hud-section { margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #1a1a2e; }
+.hud-section h4 { color:#c9a44c; font-size:11px; text-transform:uppercase; margin-bottom:4px; }
+.hud-stat { display:flex; justify-content:space-between; padding:2px 0; }
+.hud-stat .val { color:#c9a44c; }
+.progress-bar { height:10px; background:#1a1a2e; border-radius:3px; overflow:hidden; margin:3px 0; }
+.progress-fill { height:100%; border-radius:3px; transition:width 0.3s; }
+.fill-body { background:linear-gradient(90deg,#8b4513,#cd853f); }
+.fill-qi { background:linear-gradient(90deg,#1a5276,#5dade2); }
+.fill-spirit { background:linear-gradient(90deg,#4a235a,#a569bd); }
+.fill-hp { background:linear-gradient(90deg,#641e16,#e74c3c); }
+.tech-item { font-size:11px; padding:2px 0; color:#7fb3d3; }
+</style>
+</head>
+<body>
+
+<!-- ТИТУЛ -->
+<div id="title-screen" class="screen active">
+  <h1>零</h1>
+  <h2>Z E R O &nbsp; R P G</h2>
+  <p>Путь к Бессмертию начинается с нуля</p>
+  <div>
+    <button class="btn" onclick="showScreen('create-screen'); initCreation()">新游戏 — Новая Игра</button>
+    <button class="btn btn-secondary" id="btn-load" onclick="loadGame()" disabled>继续 — Продолжить</button>
+  </div>
+</div>
+
+<!-- СОЗДАНИЕ -->
+<div id="create-screen" class="screen">
+  <h2>命运之轮 — Колесо Судьбы</h2>
+  <div class="create-grid">
+    <div>
+      <div class="form-group"><label>姓名 — Имя</label><input id="inp-name" placeholder="Введите имя..." oninput="checkStart()"></div>
+      <div class="form-group"><label>性别 — Пол</label>
+        <div class="gender-btns"><button class="active" onclick="setGender(this,'male')">男 Мужской</button><button onclick="setGender(this,'female')">女 Женский</button></div>
+      </div>
+      <div class="form-group"><label>属性 — Характеристики</label><div id="stats-display" class="stats-grid"></div></div>
+      <div style="margin-top:12px"><button class="btn btn-sm" onclick="reroll()">🎲 Перебросить</button> <button class="btn" id="btn-start" onclick="startGame()" disabled>踏上征途 — Начать Путь</button></div>
+    </div>
+    <div id="fate-panel"></div>
+  </div>
+</div>
+
+<!-- ИГРА -->
+<div id="game-screen" class="screen">
+  <div class="speed-bar" id="speed-bar"></div>
+  <div class="game-body">
+    <div class="log-panel" id="log-panel"></div>
+    <div class="hud-panel" id="hud-panel"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ZERO RPG — ПОЛНАЯ ИГРА В ОДНОМ ФАЙЛЕ
+// ============================================================
+
+// --- ГЛОБАЛЬНОЕ СОСТОЯНИЕ ---
+let G = {
+  char: null,
+  day: 0,
+  speed: 1,
+  paused: false,
+  timer: null,
+  lastAction: '',
+  logEntries: [],
+  roll: null,
+  gender: 'male'
+};
+
+const SPEEDS = {1:2000, 10:400, 100:80, 1000:15};
+
+// --- ЭКРАНЫ ---
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// --- СОЗДАНИЕ ПЕРСОНАЖА ---
+const STAT_NAMES = {str:'💪 Сила',agi:'🏃 Ловкость',int:'🧠 Интеллект',end:'🛡 Выносливость',lck:'🍀 Удача'};
+const ROOT_TYPES = ['none','waste5','quad','triple','dual','single','mutated','heavenly'];
+const ROOT_NAMES = {none:'Нет корней',waste5:'五灵根 Мусорные (5)',quad:'四灵根 Четвёрные (4)',triple:'三灵根 Тройные (3)',dual:'双灵根 Двойные (2)',single:'单灵根 Одиночные (1)',mutated:'变异灵根 Мутированные',heavenly:'天灵根 Небесные'};
+const ELEMENTS = ['Огонь','Вода','Металл','Дерево','Земля'];
+const ELEM_COLORS = {'Огонь':'#e74c3c','Вода':'#3498db','Металл':'#bdc3c7','Дерево':'#27ae60','Земля':'#d4a017'};
+const ROOT_SPEEDS = {none:0,waste5:0.1,quad:0.25,triple:0.5,dual:1.0,single:2.0,mutated:3.5,heavenly:5.0};
+const PHYSIQUES = ['Обычное Тело','Крепкие Кости','Быстрые Рефлексы','Огненное Тело','Ледяные Вены','Каменное Тело','Бурная Кровь','Тело Чистого Ян','Бессмертная Кость'];
+const TRAITS = ['Хладнокровный','Храбрый','Хитрый','Милосердный','Упрямый','Любопытный','Жадный','Вспыльчивый','Осторожный','Одиночка','Высокомерный','Ленивый'];
+const ORIGINS = [{n:'Сирота',w:30},{n:'Крестьянин',w:25},{n:'Семья торговца',w:20},{n:'Малый клан',w:13},{n:'Благородный клан',w:8},{n:'Наследник великого клана',w:3},{n:'Аристократ',w:1}];
+const SUBLEVEL_NAMES = ['Закалка Кожи','Закалка Мышц','Закалка Костей','Закалка Органов','Закалка Крови'];
+const BODY_RANKS = ['Смертное Тело','Медное Тело','Серебряное Тело','Золотое Тело','Тело Дем. Бога'];
+
+function roll3d4(){return Math.min(10,Math.ceil(Math.random()*4)+Math.ceil(Math.random()*4)+Math.ceil(Math.random()*4));}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function wpick(arr){let t=arr.reduce((s,x)=>s+x.w,0),r=Math.random()*t;for(let x of arr){r-=x.w;if(r<=0)return x;}return arr[0];}
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function genRoots(){
+  if(Math.random()>0.35) return {type:'none',elements:[],speed:0};
+  let r=Math.random()*100;
+  let type=r<20?'waste5':r<40?'quad':r<60?'triple':r<78?'dual':r<90?'single':r<97?'mutated':'heavenly';
+  let count={waste5:5,quad:4,triple:3,dual:2,single:1,mutated:1,heavenly:1}[type];
+  let elems=shuffle(ELEMENTS).slice(0,count);
+  return {type,elements:elems,speed:ROOT_SPEEDS[type]};
+}
+
+function genRoll(){
+  let stats={str:roll3d4(),agi:roll3d4(),int:roll3d4(),end:roll3d4(),lck:roll3d4()};
+  let roots=genRoots();
+  let physique=Math.random()<0.7?'Обычное Тело':pick(PHYSIQUES.slice(1));
+  let traits=shuffle(TRAITS).slice(0,3);
+  let origin=wpick(ORIGINS).n;
+  return {stats,roots,physique,traits,origin};
+}
+
+function initCreation(){
+  G.roll=genRoll();
+  renderCreation();
+  if(localStorage.getItem('zerorpg_save')) document.getElementById('btn-load').disabled=false;
+}
+function reroll(){G.roll=genRoll();renderCreation();}
+function setGender(btn,g){G.gender=g;document.querySelectorAll('.gender-btns button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function checkStart(){document.getElementById('btn-start').disabled=!document.getElementById('inp-name').value.trim();}
+
+function renderCreation(){
+  let r=G.roll;
+  // Stats
+  let sh='';for(let[k,v]of Object.entries(r.stats))sh+=`<div class="stat-item"><span>${STAT_NAMES[k]}</span><span class="stat-val">${v}</span></div>`;
+  document.getElementById('stats-display').innerHTML=sh;
+  // Fate
+  let fh='';
+  fh+=`<div class="fate-section"><div class="fate-label">灵根 — Духовные Корни</div><div class="fate-value">${ROOT_NAMES[r.roots.type]}</div>`;
+  if(r.roots.elements.length)fh+='<div>'+r.roots.elements.map(e=>`<span class="elem-badge" style="border-color:${ELEM_COLORS[e]||'#555'};color:${ELEM_COLORS[e]||'#aaa'}">${e}</span>`).join('')+'</div>';
+  if(r.roots.speed)fh+=`<div style="color:#888;font-size:11px;margin-top:4px">Скорость: ×${r.roots.speed}</div>`;
+  fh+='</div>';
+  fh+=`<div class="fate-section"><div class="fate-label">体质 — Телосложение</div><div class="fate-value">${r.physique}</div></div>`;
+  fh+=`<div class="fate-section"><div class="fate-label">出身 — Происхождение</div><div class="fate-value">${r.origin}</div></div>`;
+  fh+=`<div class="fate-section"><div class="fate-label">性格 — Черты</div><div class="fate-value">${r.traits.join(', ')}</div></div>`;
+  document.getElementById('fate-panel').innerHTML=fh;
+}
+
+// --- СТАРТ ИГРЫ ---
+function startGame(){
+  let name=document.getElementById('inp-name').value.trim();
+  if(!name)return;
+  let r=G.roll;
+  G.char={
+    name, gender:G.gender,
+    stats:{...r.stats},
+    roots:r.roots, physique:r.physique, traits:r.traits, origin:r.origin,
+    hp:100, maxHp:100,
+    money: r.origin==='Семья торговца'?50:r.origin==='Благородный клан'?100:10,
+    body:{rank:0,sub:0,progress:0,max:100},
+    qi:{rank:0,sub:0,progress:0,max:150},
+    spirit:{rank:0,sub:0,progress:0,max:120},
+    techniques:[{id:'basic_fist',name:'基础拳法 Базовый Кулак',progress:0,max:100,mastery:1,maxMastery:5}],
+    location:'Деревня'
+  };
+  if(r.roots.type!=='none') G.char.techniques.push({id:'breathing',name:'吐纳术 Техника Дыхания',progress:0,max:100,mastery:1,maxMastery:5});
+  G.day=0; G.logEntries=[]; G.paused=false; G.speed=1;
+  showScreen('game-screen');
+  renderSpeedBar();
+  addLog('🌅 Тебе 16 лет. Твой путь начинается в ' + G.char.location + '...','important');
+  startTick();
+}
+
+// --- СОХРАНЕНИЕ ---
+function saveGame(){try{localStorage.setItem('zerorpg_save',JSON.stringify({char:G.char,day:G.day}));}catch(e){}}
+function loadGame(){
+  try{
+    let s=JSON.parse(localStorage.getItem('zerorpg_save'));
+    if(!s||!s.char)return;
+    G.char=s.char; G.day=s.day; G.logEntries=[]; G.paused=false; G.speed=1;
+    showScreen('game-screen'); renderSpeedBar();
+    addLog('💾 Загружено сохранение. День '+G.day,'important');
+    startTick();
+  }catch(e){}
+}
+
+// --- СКОРОСТЬ ---
+function renderSpeedBar(){
+  let h=`<button class="${G.paused?'active':''}" onclick="togglePause()">${G.paused?'▶':'⏸'}</button>`;
+  [1,10,100,1000].forEach(s=>{h+=`<button class="${!G.paused&&G.speed===s?'active':''}" onclick="setSpeed(${s})">×${s}</button>`;});
+  document.getElementById('speed-bar').innerHTML=h;
+}
+function setSpeed(s){G.speed=s;G.paused=false;renderSpeedBar();startTick();}
+function togglePause(){G.paused=!G.paused;G.paused?stopTick():startTick();renderSpeedBar();}
+function startTick(){stopTick();if(!G.paused)G.timer=setInterval(tick,SPEEDS[G.speed]||2000);}
+function stopTick(){if(G.timer){clearInterval(G.timer);G.timer=null;}}
+
+// --- ОСНОВНОЙ ТИК ---
+function tick(){
+  if(!G.char||G.paused)return;
+  G.day++;
+  let c=G.char;
+  let age=16+Math.floor(G.day/365);
+  let season=['Весна','Лето','Осень','Зима'][Math.floor((G.day%365)/91)];
+
+  // Выбор судьбы (раз в год)
+  if(G.day>0 && G.day%365===0){showFateChoice(age);return;}
+
+  // ИИ решает что делать
+  let action=decideAction(c);
+  let result=executeAction(c,action);
+
+  // Прогресс культивации
+  advanceCultivation(c);
+  advanceTechniques(c);
+
+  // Лог (при высокой скорости — только важное)
+  if(G.speed<=10 || result.important){
+    let prefix = G.speed<=10 ? `📅 Д.${G.day} | ${season} | ${age}л. ` : '';
+    addLog(prefix + result.text, result.cls||'');
+  }
+
+  // Сохранение
+  if(G.day%30===0) saveGame();
+
+  // Обновить HUD
+  renderHUD();
+
+  // Смерть от старости
+  if(age>=70 && c.body.rank===0 && c.qi.rank===0){
+    stopTick();
+    addLog('💀 Тебе ' + age + ' лет. Без культивации тело не выдержало... Ты умер от старости.','important');
+  }
+}
+
+// --- ИИ ПЕРСОНАЖА ---
+function decideAction(c){
+  if(c.hp<40) return 'rest';
+  if(c.money<5 && Math.random()<0.4) return 'work';
+  let r=Math.random()*100;
+  if(r<30) return 'train_body';
+  if(r<50) return c.roots.type!=='none'?'meditate':'train_body';
+  if(r<60) return 'work';
+  if(r<70) return 'explore';
+  if(r<78) return 'social';
+  if(r<85) return 'rest';
+  if(r<92) return 'combat';
+  return 'travel';
+}
+
+// --- ВЫПОЛНЕНИЕ ДЕЙСТВИЙ ---
+const TRAIN_TEXTS=['Удары по бамбуковому столбу.','Отжимания до отказа.','Бег вокруг деревни.','Удары ногами по стволу.','Приседания с камнем.','Стойка на руках у стены.','Растяжка и гибкость.'];
+const MED_TEXTS=['Медитация у ручья.','Дыхательная практика на рассвете.','Попытка ощутить ци мира.','Сидишь в позе лотоса час.','Концентрация на дантяне.'];
+const WORK_TEXTS=['Помощь на рисовом поле.','Колка дров для соседей.','Разнос воды из колодца.','Помощь кузнецу.','Сбор хвороста в лесу.','Ловля рыбы на продажу.'];
+const SOCIAL_TEXTS=['Разговор со старейшиной.','Игра с детьми на площади.','Слушаешь истории странника.','Чай с соседом Вэйем.','Торговец рассказывает о городе.'];
+const EXPLORE_TEXTS=['Прогулка по лесной тропе.','Осмотр старого храма.','Забрался на холм — вид на долину.','Нашёл ручей с чистой водой.','Заброшенная хижина в зарослях.'];
+const COMBAT_TEXTS=['Дикий волк на тропе!','Кабан выскочил из кустов!','Змея на пути!','Бандит у дороги!','Бродячий пёс рычит!'];
+const TRAVEL_TEXTS=['Идёшь по дороге к городу.','Путь через бамбуковую рощу.','Переправа через реку.','Спуск с холма к равнине.'];
+
+function executeAction(c,action){
+  let txt='', cls='', imp=false;
+  switch(action){
+    case 'train_body':
+      let gain=0.5+Math.random()*1.0;
+      c.body.progress+=gain;
+      c.stats.str+=0.01; c.stats.end+=0.01;
+      txt=pick(TRAIN_TEXTS)+` Тело +${gain.toFixed(1)}`;
+      break;
+    case 'meditate':
+      let qgain=c.roots.speed*(0.5+Math.random()*0.5);
+      c.qi.progress+=qgain;
+      txt=pick(MED_TEXTS)+` Ци +${qgain.toFixed(1)}`;
+      break;
+    case 'work':
+      let pay=2+Math.floor(Math.random()*4);
+      c.money+=pay;
+      txt=pick(WORK_TEXTS)+` +${pay}💰`;
+      break;
+    case 'explore':
+      txt=pick(EXPLORE_TEXTS);
+      if(Math.random()<0.08){
+        let tech=findNewTechnique(c);
+        if(tech){txt+=` 📜 Нашёл свиток: "${tech.name}"!`; imp=true; cls='important';}
+      }
+      if(Math.random()<0.05){let m=5+Math.floor(Math.random()*15);c.money+=m;txt+=` 💰 Нашёл ${m} монет!`;imp=true;}
+      break;
+    case 'social':
+      txt='💬 '+pick(SOCIAL_TEXTS);
+      if(Math.random()<0.1){c.spirit.progress+=2;txt+=' Дух +2';}
+      break;
+    case 'rest':
+      c.hp=Math.min(c.maxHp,c.hp+20);
+      txt='😴 Отдых. HP +20';
+      break;
+    case 'combat':
+      let enemy=pick(COMBAT_TEXTS);
+      let power=c.stats.str+c.body.rank*10+c.body.sub*2;
+      let enemyPow=3+Math.random()*8+G.day*0.01;
+      if(power>enemyPow){
+        let bg=1+Math.random()*2;c.body.progress+=bg;
+        txt=`⚔️ ${enemy} Бой... Победа! Тело +${bg.toFixed(1)}`;
+        if(Math.random()<0.3){let loot=3+Math.floor(Math.random()*8);c.money+=loot;txt+=` +${loot}💰`;}
+        cls='combat'; imp=true;
+      } else {
+        let dmg=10+Math.floor(Math.random()*20);c.hp=Math.max(1,c.hp-dmg);
+        txt=`⚔️ ${enemy} Проигрыш! HP -${dmg}`;
+        cls='combat'; imp=true;
+      }
+      break;
+    case 'travel':
+      let locs=['Деревня','Лес','Город','Горная тропа','Рынок'];
+      let newLoc=pick(locs.filter(l=>l!==c.location));
+      c.location=newLoc;
+      txt='🏃 '+pick(TRAVEL_TEXTS)+` Прибыл: ${newLoc}`;
+      imp=true; cls='important';
+      break;
+  }
+  return {text:txt, cls, important:imp};
+}
+
+// --- ПРОГРЕСС КУЛЬТИВАЦИИ ---
+function advanceCultivation(c){
+  // Путь Тела
+  if(c.body.progress>=c.body.max){
+    c.body.progress=0;
+    c.body.sub++;
+    if(c.body.sub>=5){c.body.sub=0;c.body.rank++;c.body.max*=3;}
+    else{c.body.max=Math.round(c.body.max*1.5);}
+    let nm=c.body.rank===0?SUBLEVEL_NAMES[c.body.sub]||'Пик':BODY_RANKS[c.body.rank]||`Ранг ${c.body.rank+1}`;
+    c.stats.str+=2+c.body.rank; c.stats.end+=1+c.body.rank; c.maxHp+=10+c.body.rank*5; c.hp=c.maxHp;
+    addLog(`⚡ ПРОРЫВ! Путь Тела: ${nm}! Сила +${2+c.body.rank}, Выносливость +${1+c.body.rank}`,'breakthrough');
+  }
+  // Путь Ци
+  if(c.roots.type!=='none' && c.qi.progress>=c.qi.max){
+    c.qi.progress=0; c.qi.sub++;
+    if(c.qi.sub>=4){c.qi.sub=0;c.qi.rank++;c.qi.max*=3;}
+    else{c.qi.max=Math.round(c.qi.max*1.5);}
+    c.stats.int+=2; c.stats.agi+=1;
+    addLog(`⚡ ПРОРЫВ! Путь Ци: Ранг ${c.qi.rank+1}, ступень ${c.qi.sub+1}! Интеллект +2`,'breakthrough');
+  }
+}
+
+// --- ТЕХНИКИ ---
+const ALL_TECHS=[
+  {id:'iron_fist',name:'铁拳 Железный Кулак',max:120,maxM:5},
+  {id:'swift_step',name:'疾步 Быстрый Шаг',max:100,maxM:4},
+  {id:'stone_skin',name:'石肤 Каменная Кожа',max:150,maxM:5},
+  {id:'tiger_strike',name:'虎击 Удар Тигра',max:130,maxM:5},
+  {id:'water_flow',name:'流水 Текучая Вода',max:110,maxM:4},
+  {id:'flame_fist',name:'火拳 Огненный Кулак',max:160,maxM:6},
+  {id:'wind_blade',name:'风刃 Лезвие Ветра',max:140,maxM:5},
+  {id:'earth_wall',name:'土墙 Земляная Стена',max:120,maxM:4},
+  {id:'spirit_eye',name:'灵眼 Духовный Взор',max:100,maxM:3},
+  {id:'thunder_palm',name:'雷掌 Ладонь Грома',max:200,maxM:6},
+];
+
+function findNewTechnique(c){
+  let known=c.techniques.map(t=>t.id);
+  let avail=ALL_TECHS.filter(t=>!known.includes(t.id));
+  if(!avail.length)return null;
+  let t=pick(avail);
+  c.techniques.push({id:t.id,name:t.name,progress:0,max:t.max,mastery:1,maxMastery:t.maxM});
+  return t;
+}
+
+function advanceTechniques(c){
+  if(!c.techniques.length)return;
+  let t=c.techniques[0]; // Тренирует первую неосвоенную
+  for(let tech of c.techniques){if(tech.mastery<tech.maxMastery){t=tech;break;}}
+  t.progress+=1.5+Math.random();
+  if(t.progress>=t.max){
+    t.progress=0; t.mastery++;
+    if(t.mastery>t.maxMastery)t.mastery=t.maxMastery;
+    else{t.max=Math.round(t.max*1.4);
+    addLog(`📖 Техника "${t.name}" повысилась! Мастерство: ${t.mastery}/${t.maxMastery}`,'important');}
+  }
+}
+
+// --- ВЫБОР СУДЬБЫ ---
+function showFateChoice(age){
+  stopTick();
+  let events=[
+    {text:`⚡ К деревне подходит вербовщик секты. Он ищет таланты.`,choices:['Подойти и попробовать','Скрыться — не готов','Спросить у старейшины'],results:['Ты подошёл. Проверка... '+(G.char.roots.type!=='none'?'Принят!':'Отказ — нет корней.'),'Ты скрылся в лесу. Жизнь продолжается.','Старейшина посоветовал подождать год.']},
+    {text:`⚡ В лесу ты находишь пещеру, из которой исходит странная аура.`,choices:['Войти','Отметить и вернуться позже','Пройти мимо'],results:['Внутри — каменная плита с техникой! 📜','Ты запомнил место.','Осторожность — мать мудрости.']},
+    {text:`⚡ Странствующий старик предлагает стать твоим учителем.`,choices:['Согласиться','Отказаться','Расспросить подробнее'],results:['Он начинает обучать тебя! Прогресс ×2 на 100 дней.','Ты вежливо отклонил.','Он рассказывает о Дао меча... Интересно. Дух +5.']},
+    {text:`⚡ Бандиты напали на деревню! Жители в панике.`,choices:['Сражаться','Помочь эвакуации','Бежать'],results:['Ты дерёшься! '+(G.char.stats.str>12?'Победа! Герой деревни!':'Ранен, но выжил.'),'Ты спас 3 семьи. Карма +10.','Ты убежал. Стыдно, но жив.']},
+  ];
+  let ev=pick(events);
+  let html=`<div class="log-entry choice-event"><div style="margin-bottom:8px">${ev.text}</div>`;
+  ev.choices.forEach((ch,i)=>{
+    html+=`<button class="choice-btn" onclick="resolveFate(${i})">${ch}</button>`;
+  });
+  html+='</div>';
+  G._fateResults=ev.results;
+  document.getElementById('log-panel').innerHTML+=html;
+  scrollLog();
+}
+
+function resolveFate(i){
+  let result=G._fateResults[i]||'...';
+  addLog('✨ '+result,'important');
+  G.paused=false; startTick(); renderSpeedBar();
+}
+
+// --- ЛОГ ---
+function addLog(text,cls){
+  cls=cls||'';
+  G.logEntries.push({text,cls});
+  if(G.logEntries.length>200)G.logEntries.shift();
+  let panel=document.getElementById('log-panel');
+  let div=document.createElement('div');
+  div.className='log-entry'+(cls?' '+cls:'');
+  div.textContent=text;
+  panel.appendChild(div);
+  if(panel.children.length>200)panel.removeChild(panel.firstChild);
+  scrollLog();
+}
+function scrollLog(){let p=document.getElementById('log-panel');p.scrollTop=p.scrollHeight;}
+
+// --- HUD ---
+function renderHUD(){
+  let c=G.char; if(!c)return;
+  let age=16+Math.floor(G.day/365);
+  let h='';
+  h+=`<div class="hud-section"><h4>${c.name}</h4><div style="color:#888">Возраст: ${age} | День ${G.day}</div><div style="color:#888">📍 ${c.location}</div></div>`;
+  // HP
+  let hpp=Math.round(c.hp/c.maxHp*100);
+  h+=`<div class="hud-section"><h4>HP</h4><div class="progress-bar"><div class="progress-fill fill-hp" style="width:${hpp}%"></div></div><div style="font-size:11px;color:#888">${Math.round(c.hp)}/${c.maxHp}</div></div>`;
+  // Культивация
+  let bp=Math.round(c.body.progress/c.body.max*100);
+  let bname=c.body.rank===0?(SUBLEVEL_NAMES[c.body.sub]||'Пик'):(BODY_RANKS[c.body.rank]||`Ранг ${c.body.rank+1}`);
+  h+=`<div class="hud-section"><h4>Путь Тела</h4><div style="font-size:11px">${bname}</div><div class="progress-bar"><div class="progress-fill fill-body" style="width:${bp}%"></div></div><div style="font-size:10px;color:#888">${bp}% (${Math.round(c.body.progress)}/${c.body.max})</div></div>`;
+  if(c.roots.type!=='none'){
+    let qp=Math.round(c.qi.progress/c.qi.max*100);
+    h+=`<div class="hud-section"><h4>Путь Ци</h4><div style="font-size:11px">Ранг ${c.qi.rank+1}, ступень ${c.qi.sub+1}</div><div class="progress-bar"><div class="progress-fill fill-qi" style="width:${qp}%"></div></div><div style="font-size:10px;color:#888">${qp}%</div></div>`;
+  } else {
+    h+=`<div class="hud-section"><h4>Путь Ци</h4><div style="font-size:11px;color:#555">🔒 Нет корней</div></div>`;
+  }
+  // Стат
+  h+=`<div class="hud-section"><h4>Характеристики</h4>`;
+  h+=`<div class="hud-stat"><span>💪 Сила</span><span class="val">${Math.round(c.stats.str*10)/10}</span></div>`;
+  h+=`<div class="hud-stat"><span>🏃 Ловк.</span><span class="val">${Math.round(c.stats.agi*10)/10}</span></div>`;
+  h+=`<div class="hud-stat"><span>🧠 Инт.</span><span class="val">${Math.round(c.stats.int*10)/10}</span></div>`;
+  h+=`<div class="hud-stat"><span>🛡 Вын.</span><span class="val">${Math.round(c.stats.end*10)/10}</span></div>`;
+  h+=`<div class="hud-stat"><span>🍀 Удача</span><span class="val">${Math.round(c.stats.lck*10)/10}</span></div>`;
+  h+=`</div>`;
+  // Корни
+  h+=`<div class="hud-section"><h4>Корни</h4><div style="font-size:11px">${ROOT_NAMES[c.roots.type]||'?'}</div>`;
+  if(c.roots.elements.length)h+='<div>'+c.roots.elements.map(e=>`<span class="elem-badge" style="border-color:${ELEM_COLORS[e]||'#555'};color:${ELEM_COLORS[e]||'#aaa'};font-size:10px">${e}</span>`).join('')+'</div>';
+  h+='</div>';
+  // Техники
+  h+=`<div class="hud-section"><h4>Техники</h4>`;
+  c.techniques.forEach(t=>{
+    let tp=Math.round(t.progress/t.max*100);
+    h+=`<div class="tech-item">${t.name} [${t.mastery}/${t.maxMastery}] ${tp}%</div>`;
+  });
+  h+='</div>';
+  // Деньги
+  h+=`<div class="hud-section"><div class="hud-stat"><span>💰 Монеты</span><span class="val">${c.money}</span></div></div>`;
+  document.getElementById('hud-panel').innerHTML=h;
+}
+
+// --- INIT ---
+window.onload=function(){
+  if(localStorage.getItem('zerorpg_save'))document.getElementById('btn-load').disabled=false;
+};
+</script>
+</body>
+</html>

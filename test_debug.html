@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Zero RPG — Поиск ошибки</title>
+    <style>
+        body { background: #1a1a2e; color: #e0d8c8; font-family: monospace; padding: 20px; }
+        .ok { color: #4caf50; }
+        .err { color: #f44336; }
+        #log { white-space: pre-wrap; line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Поиск ошибки — подключение файлов по одному</h1>
+    <div id="log"></div>
+
+    <script>
+        const log = document.getElementById('log');
+        function ok(msg) { log.innerHTML += `<span class="ok">✅ ${msg}</span>\n`; }
+        function err(msg) { log.innerHTML += `<span class="err">❌ ${msg}</span>\n`; }
+        function info(msg) { log.innerHTML += `ℹ️ ${msg}\n`; }
+    </script>
+
+    <!-- Подключаем файлы по одному с проверкой -->
+    <script>info('Загрузка state.js...');</script>
+    <script src="src/state.js" onerror="err('state.js НЕ ЗАГРУЗИЛСЯ')"></script>
+    <script>
+        if (typeof GameState !== 'undefined') ok('state.js — GameState определён');
+        else err('state.js — GameState НЕ определён');
+    </script>
+
+    <script>info('Загрузка spirit_roots.js...');</script>
+    <script src="src/character/spirit_roots.js" onerror="err('spirit_roots.js НЕ ЗАГРУЗИЛСЯ')"></script>
+    <script>
+        if (typeof generateSpiritRoots !== 'undefined') ok('spirit_roots.js — generateSpiritRoots определён');
+        else err('spirit_roots.js — generateSpiritRoots НЕ определён');
+    </script>
+
+    <script>info('Загрузка physique.js...');</script>
+    <script src="src/character/physique.js" onerror="err('physique.js НЕ ЗАГРУЗИЛСЯ')"></script>
+    <script>
+        if (typeof generatePhysique !== 'undefined') ok('physique.js — generatePhysique определён');
+        else err('physique.js — generatePhysique НЕ определён');
+    </script>
+
+    <script>info('Загрузка traits.js...');</script>
+    <script src="src/character/traits.js" onerror="err('traits.js НЕ ЗАГРУЗИЛСЯ')"></script>
+    <script>
+        if (typeof generateTraits !== 'undefined') ok('traits.js — generateTraits определён');
+        else err('traits.js — generateTraits НЕ определён');
+    </script>
+
+    <script>info('Загрузка origin.js...');</script>
+    <script src="src/character/origin.js" onerror="err('origin.js НЕ ЗАГРУЗИЛСЯ')"></script>
+    <script>
+        if (typeof generateOrigin !== 'undefined') ok('origin.js — generateOrigin определён');
+        else err('origin.js — generateOrigin НЕ определён');
+    </script>
+
+    <script>info('Загрузка stats.js...');</script>
+    <script src="src/character/stats.js" onerror="err('stats.js НЕ ЗАГРУЗИЛСЯ')"></script>
+    <script>
+        if (typeof rollBaseStats !== 'undefined') ok('stats.js — rollBaseStats определён');
+        else err('stats.js — rollBaseStats НЕ определён');
+    </script>
+
+    <script>info('Загрузка creation.js...');</script>
+    <script src="src/character/creation.js" onerror="err('creation.js НЕ ЗАГРУЗИЛСЯ')"></script>
+    <script>
+        if (typeof CharacterCreation !== 'undefined') ok('creation.js — CharacterCreation определён');
+        else err('creation.js — CharacterCreation НЕ определён');
+    </script>
+
+    <script>
+        info('');
+        info('=== ИТОГ ===');
+        if (typeof CharacterCreation !== 'undefined' && typeof generateSpiritRoots !== 'undefined') {
+            ok('Все базовые модули загружены! Проблема в более поздних файлах.');
+            info('Тест генерации...');
+            try {
+                const roots = generateSpiritRoots(true);
+                ok('generateSpiritRoots() работает: тип = ' + roots.type);
+                const stats = rollBaseStats();
+                ok('rollBaseStats() работает: сила = ' + stats.strength);
+                const phys = generatePhysique();
+                ok('generatePhysique() работает: ' + phys.name);
+                const traits = generateTraits();
+                ok('generateTraits() работает: ' + traits.map(t => t.name).join(', '));
+                const origin = generateOrigin();
+                ok('generateOrigin() работает: ' + origin.name);
+            } catch(e) {
+                err('ОШИБКА при генерации: ' + e.message + ' в ' + e.stack);
+            }
+        } else {
+            err('Один или несколько модулей НЕ загрузились. Смотри выше.');
+        }
+    </script>
+</body>
+</html>

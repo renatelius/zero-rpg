@@ -1,0 +1,406 @@
+/**
+ * Zero RPG — Боевые стили
+ * Красная тема для режима боя
+ */
+
+/* === ЭКРАН БОЯ === */
+#combat-screen {
+    background: linear-gradient(180deg, #1a0000 0%, #0d0d0d 50%, #1a0000 100%);
+    min-height: 100vh;
+    padding: 1rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.combat-arena {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+}
+
+#combat-screen.active {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+/* === ИНФОРМАЦИЯ О БОЙЦАХ === */
+.combatant {
+    background: rgba(20, 0, 0, 0.8);
+    border: 1px solid rgba(180, 40, 40, 0.4);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    position: relative;
+}
+
+.combatant-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #f0e6d3;
+    margin-bottom: 0.3rem;
+}
+
+.combatant-desc {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+.enemy-info {
+    border-color: rgba(200, 50, 50, 0.5);
+    box-shadow: 0 0 15px rgba(200, 50, 50, 0.1);
+}
+
+.player-info {
+    border-color: rgba(50, 150, 200, 0.5);
+    box-shadow: 0 0 15px rgba(50, 150, 200, 0.1);
+}
+
+/* === HP / QI БАРЫ === */
+.hp-bar-container, .qi-bar-container {
+    position: relative;
+    height: 22px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    margin: 0.3rem 0;
+    overflow: hidden;
+    border: 1px solid rgba(100, 100, 100, 0.3);
+}
+
+.hp-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.player-hp {
+    background: linear-gradient(90deg, #2d8f3d, #44c767);
+    box-shadow: 0 0 8px rgba(68, 199, 103, 0.3);
+}
+
+.enemy-hp {
+    background: linear-gradient(90deg, #8f2d2d, #c74444);
+    box-shadow: 0 0 8px rgba(199, 68, 68, 0.3);
+}
+
+.hp-bar.hp-critical {
+    background: linear-gradient(90deg, #8f2d2d, #ff3333) !important;
+    animation: hp-pulse 0.8s infinite;
+}
+
+.qi-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #2d4f8f, #4488cc);
+    box-shadow: 0 0 8px rgba(68, 136, 204, 0.3);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.hp-text, .qi-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    font-weight: bold;
+    z-index: 1;
+}
+
+/* === ШКАЛА НАПРЯЖЕНИЯ === */
+.tension-container {
+    text-align: center;
+    padding: 0.4rem;
+}
+
+.tension-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.tension-label {
+    font-size: 0.85rem;
+    color: #ffaa44;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.tension-segments {
+    display: flex;
+    gap: 4px;
+}
+
+.tension-segment {
+    width: 30px;
+    height: 8px;
+    background: rgba(60, 20, 0, 0.6);
+    border: 1px solid rgba(180, 80, 0, 0.4);
+    border-radius: 3px;
+    transition: all 0.3s;
+}
+
+.tension-segment.tension-filled {
+    background: linear-gradient(90deg, #cc4400, #ff6600);
+    box-shadow: 0 0 6px rgba(255, 102, 0, 0.5);
+    border-color: #ff8800;
+}
+
+.tension-segment.tension-current {
+    animation: tension-glow 1s infinite;
+}
+
+.tension-desc {
+    font-size: 0.7rem;
+    color: #aa7744;
+    font-style: italic;
+}
+
+/* === ЛОГ БОЯ === */
+.combat-log {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(100, 50, 50, 0.3);
+    border-radius: 6px;
+    padding: 0.8rem;
+    min-height: 120px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.combat-narration {
+    color: #d4c4a0;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(100, 50, 50, 0.2);
+}
+
+.combat-entry {
+    margin: 0.4rem 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    animation: fadeSlideIn 0.3s ease;
+}
+
+.player-action {
+    color: #88ccff;
+    border-left: 3px solid #4488cc;
+}
+
+.enemy-action {
+    color: #ff8888;
+    border-left: 3px solid #cc4444;
+}
+
+.victory-text {
+    color: #44ff88;
+    background: rgba(0, 80, 40, 0.2);
+    border: 1px solid rgba(68, 255, 136, 0.3);
+    text-align: center;
+    padding: 0.8rem;
+}
+
+.defeat-text {
+    color: #ff6666;
+    background: rgba(80, 0, 0, 0.2);
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    text-align: center;
+    padding: 0.8rem;
+}
+
+.flee-text {
+    color: #ffcc44;
+    background: rgba(60, 40, 0, 0.2);
+    border: 1px solid rgba(255, 200, 68, 0.3);
+    text-align: center;
+    padding: 0.6rem;
+}
+
+/* === КНОПКИ ДЕЙСТВИЙ === */
+.combat-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.combat-action-btn {
+    background: rgba(30, 10, 10, 0.8);
+    border: 1px solid rgba(180, 80, 80, 0.4);
+    border-radius: 8px;
+    padding: 0.7rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    animation: fadeSlideIn 0.3s ease backwards;
+}
+
+.combat-action-btn:hover {
+    background: rgba(60, 20, 20, 0.9);
+    border-color: rgba(220, 100, 100, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(200, 50, 50, 0.2);
+}
+
+.combat-action-btn:active {
+    transform: translateY(0);
+}
+
+.action-name {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #f0e6d3;
+    margin-bottom: 0.2rem;
+}
+
+.action-desc {
+    font-size: 0.75rem;
+    color: #999;
+    line-height: 1.3;
+}
+
+/* Типы действий */
+.action-attack { border-color: rgba(220, 100, 50, 0.5); }
+.action-attack:hover { border-color: rgba(255, 130, 60, 0.8); }
+
+.action-technique { border-color: rgba(100, 150, 220, 0.5); }
+.action-technique:hover { border-color: rgba(120, 180, 255, 0.8); }
+
+.action-defend { border-color: rgba(100, 180, 100, 0.5); }
+.action-defend:hover { border-color: rgba(120, 220, 120, 0.8); }
+
+.action-trump { border-color: rgba(200, 50, 200, 0.5); }
+.action-trump:hover { border-color: rgba(255, 80, 255, 0.8); box-shadow: 0 4px 12px rgba(200, 50, 200, 0.3); }
+
+.action-flee { border-color: rgba(180, 180, 80, 0.5); }
+.action-flee:hover { border-color: rgba(220, 220, 100, 0.8); }
+
+.action-consumable { border-color: rgba(80, 200, 150, 0.5); }
+.action-consumable:hover { border-color: rgba(100, 240, 180, 0.8); }
+
+.action-continue {
+    grid-column: 1 / -1;
+    text-align: center;
+    border-color: rgba(200, 180, 100, 0.5);
+}
+.action-continue:hover { border-color: rgba(255, 220, 120, 0.8); }
+
+/* === ЭЛЕМЕНТАЛЬНЫЕ БЕЙДЖИ === */
+.element-badge {
+    font-size: 0.8rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    display: inline-block;
+}
+
+.element-metal { border: 1px solid rgba(192, 192, 192, 0.4); }
+.element-wood { border: 1px solid rgba(46, 139, 87, 0.4); }
+.element-water { border: 1px solid rgba(65, 105, 225, 0.4); }
+.element-fire { border: 1px solid rgba(220, 20, 60, 0.4); }
+.element-earth { border: 1px solid rgba(218, 165, 32, 0.4); }
+
+/* === ЭЛЕМЕНТАЛЬНЫЕ ВСПЫШКИ === */
+.element-interaction {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    animation: elementFlash 0.5s ease;
+}
+
+.element-flash-critical {
+    background: rgba(255, 100, 0, 0.2);
+    color: #ffaa44;
+    border: 1px solid rgba(255, 150, 0, 0.4);
+}
+
+.element-flash-weak {
+    background: rgba(100, 100, 200, 0.15);
+    color: #8899cc;
+    border: 1px solid rgba(100, 100, 200, 0.3);
+}
+
+.interaction-mult {
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+/* === АНИМАЦИИ === */
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes hp-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes tension-glow {
+    0%, 100% { box-shadow: 0 0 4px rgba(255, 100, 0, 0.3); }
+    50% { box-shadow: 0 0 12px rgba(255, 100, 0, 0.7); }
+}
+
+@keyframes elementFlash {
+    0% { opacity: 0; transform: scale(0.8); }
+    50% { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.hit-flash {
+    animation: hitFlash 0.3s ease;
+}
+
+@keyframes hitFlash {
+    0% { filter: brightness(1); }
+    25% { filter: brightness(2); border-color: #fff; }
+    100% { filter: brightness(1); }
+}
+
+/* === СКРОЛЛБАР ЛОГА === */
+.combat-log::-webkit-scrollbar {
+    width: 4px;
+}
+
+.combat-log::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.combat-log::-webkit-scrollbar-thumb {
+    background: rgba(180, 80, 80, 0.4);
+    border-radius: 2px;
+}
+
+/* === АДАПТИВНОСТЬ === */
+@media (max-width: 500px) {
+    .combat-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .combat-arena {
+        gap: 0.5rem;
+    }
+
+    .combat-action-btn {
+        padding: 0.6rem;
+    }
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Zero RPG — Ультра-Тест</title>
+    <style>
+        body { background: #1a1a2e; color: #e0d8c8; font-family: sans-serif; padding: 40px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #8b0000; color: white; border: 1px solid #c9a44c; font-size: 16px; }
+        button:hover { background: #a00; }
+        input { padding: 10px; width: 300px; font-size: 16px; background: #2a2a3e; color: white; border: 1px solid #c9a44c; }
+        #log { margin-top: 20px; padding: 15px; background: #111; border: 1px solid #333; white-space: pre-wrap; font-family: monospace; max-height: 400px; overflow-y: auto; }
+        .stat { display: inline-block; margin: 5px; padding: 5px 15px; background: #2a2a3e; border: 1px solid #555; }
+    </style>
+</head>
+<body>
+    <h1>零 ZERO RPG — Ультра-Тест</h1>
+    <p>Если кнопки ниже работают — ядро в порядке.</p>
+    
+    <hr>
+    <h3>Имя:</h3>
+    <input type="text" id="name-input" placeholder="Введи имя...">
+    
+    <h3>Действия:</h3>
+    <button onclick="testRoll()">🎲 Бросить характеристики</button>
+    <button onclick="testStart()">⚔️ Начать Путь</button>
+    <button onclick="testClear()">🗑️ Очистить</button>
+    
+    <h3>Результат:</h3>
+    <div id="result"></div>
+    
+    <h3>Лог:</h3>
+    <div id="log"></div>
+
+    <script>
+        function log(msg) {
+            document.getElementById('log').textContent += msg + '\n';
+            console.log(msg);
+        }
+        
+        function roll3d4() {
+            const r = () => Math.ceil(Math.random() * 4);
+            return Math.min(10, r() + r() + r());
+        }
+        
+        function testRoll() {
+            log('Бросаю характеристики...');
+            const stats = {
+                'Сила': roll3d4(),
+                'Ловкость': roll3d4(),
+                'Интеллект': roll3d4(),
+                'Выносливость': roll3d4(),
+                'Удача': roll3d4()
+            };
+            
+            let html = '';
+            for (const [name, val] of Object.entries(stats)) {
+                html += `<span class="stat">${name}: <b>${val}</b></span>`;
+            }
+            
+            // Корни (35% шанс)
+            const hasRoots = Math.random() < 0.35;
+            if (hasRoots) {
+                const types = ['Мусорные (5)', 'Четвёрные (4)', 'Тройные (3)', 'Двойные (2)', 'Одиночные (1)', 'Мутированные', 'Небесные'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                html += `<br><br>🌿 <b style="color: #4fc3f7">Духовные корни: ${type}</b>`;
+            } else {
+                html += `<br><br>⚫ <b style="color: #777">Нет духовных корней</b> (Доступен Путь Тела и Духа)`;
+            }
+            
+            document.getElementById('result').innerHTML = html;
+            log('✅ Характеристики готовы!');
+        }
+        
+        function testStart() {
+            const name = document.getElementById('name-input').value.trim();
+            if (!name) {
+                log('❌ Введи имя!');
+                alert('Введи имя!');
+                return;
+            }
+            log(`⚔️ Начинаем путь для: ${name}`);
+            document.getElementById('result').innerHTML = `<h2 style="color: #c9a44c">🎮 ${name}, твой путь начинается!</h2><p>Если ты видишь это — ядро работает. Проблема в подключении модулей.</p>`;
+        }
+        
+        function testClear() {
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('log').textContent = '';
+            document.getElementById('name-input').value = '';
+            log('Очищено.');
+        }
+        
+        log('✅ Страница загружена. Кнопки должны работать.');
+    </script>
+</body>
+</html>
