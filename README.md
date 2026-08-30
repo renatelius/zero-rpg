@@ -70,7 +70,7 @@ GameState (src/state.js) holds all mutable state and saves it to localStorage.
 | | `actions.js` | `CombatActions` | Available player actions, conditions and damage calculations |
 | | `enemies.js` | `EnemyTemplates` | Enemy templates and rank-scaled generation |
 | | `engine.js` | `CombatEngine` | Turn loop: player turn → enemy turn → win/loss checks |
-| **techniques** | `technique_data.js` | `TECHNIQUES` database | 230+ techniques (Qi / martial / spirit / combined) |
+| **techniques** | `technique_data.js` | `TechniqueData` | 230+ techniques (Qi / martial / spirit / combined) |
 | | `technique_system.js` | `TechniqueSystem` | Learning, mastery, compatibility, qi deviation |
 | | `technique_encounters.js` | `TechniqueEncounters` | Acquiring techniques: finds, market, mentors, theft |
 | **economy** | `inventory.js` | `Inventory` | Items, equipment, consumables (30 slots) |
