@@ -34,12 +34,12 @@ const CombatEngine = {
         this.state = {
             player: {
                 name: player.name,
-                hp: player.combat?.hp || player.stats?.body * 10 + 50 || 100,
-                maxHp: player.combat?.maxHp || player.stats?.body * 10 + 50 || 100,
-                qi: player.combat?.qi || player.stats?.qi * 5 + 20 || 30,
-                maxQi: player.combat?.maxQi || player.stats?.qi * 5 + 20 || 30,
-                attack: player.combat?.attack || player.stats?.body * 2 + 5 || 10,
-                defense: player.combat?.defense || Math.floor((player.stats?.body || 2) * 1.5) || 3,
+                hp: player.hp || 100,
+                maxHp: player.maxHp || 100,
+                qi: player.cultivation?.qi?.rank * 20 + 30 || 30,
+                maxQi: player.cultivation?.qi?.rank * 20 + 30 || 30,
+                attack: (player.stats?.strength || 5) * 2 + 5 || 10,
+                defense: Math.floor((player.stats?.endurance || 2) * 1.5) || 3,
                 element: player.element || null,
                 techniques: player.techniques || [],
                 trumpCard: player.trumpCard || null,
@@ -163,11 +163,8 @@ const CombatEngine = {
         const config = this.state.config;
         const player = GameState.getCharacter();
 
-        // Обновить HP/Qi персонажа после боя
-        if (player.combat) {
-            player.combat.hp = Math.max(1, this.state.player.hp);
-            player.combat.qi = this.state.player.qi;
-        }
+        // Обновить HP персонажа после боя
+        player.hp = Math.max(1, this.state.player.hp);
 
         // Эффект на Дао-сердце
         if (outcome === 'victory') {
@@ -179,7 +176,7 @@ const CombatEngine = {
         } else if (outcome === 'defeat') {
             // FAIL-FORWARD: поражение не = game over
             player.dao_heart = (player.dao_heart || 50) - 10;
-            if (player.combat) player.combat.hp = Math.ceil(this.state.player.maxHp * 0.3);
+            player.hp = Math.ceil(this.state.player.maxHp * 0.3);
             this.renderDefeat();
             if (config.onDefeat) {
                 setTimeout(() => config.onDefeat(this.state), 2000);

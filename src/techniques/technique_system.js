@@ -34,7 +34,7 @@ const TechniqueSystem = {
    */
   calculateCompatibility(character, technique) {
     let compat = 0;
-    const charElements = character.spirit_roots?.elements || [];
+    const charElements = character.roots?.elements || [];
     const techElement = technique.element;
 
     // Элементальная совместимость
@@ -243,7 +243,7 @@ const TechniqueSystem = {
     if (req.spiritRank && (paths.spirit?.rank || 0) < req.spiritRank)
       return { met: false, reason: `Требуется Путь Духа ранг ${req.spiritRank}` };
     if (req.element && req.element !== 'none') {
-      const charElements = character.spirit_roots?.elements || [];
+      const charElements = character.roots?.elements || [];
       // Не блокируем полностью — просто низкая совместимость
     }
 

@@ -159,7 +159,7 @@ const Conditions = {
     if (statName === 'dao_heart') return character.dao_heart || 0;
     if (statName === 'luck') return character.stats?.luck || character.attributes?.luck || 0;
     if (statName === 'intellect') return character.stats?.intellect || 0;
-    if (statName === 'body') return character.stats?.body || 0;
+    if (statName === 'body') return character.stats?.endurance || 0;
     if (statName === 'qi') return character.stats?.qi || 0;
     if (statName === 'spirit') return character.stats?.spirit || 0;
     return 0;

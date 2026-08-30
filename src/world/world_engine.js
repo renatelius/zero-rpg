@@ -215,7 +215,7 @@ const WorldEngine = {
         if (!char.cultivation) return;
 
         // Проверка доступа
-        if (path === 'qi' && char.spirit_roots?.type === 'none') {
+        if (path === 'qi' && char.roots?.type === 'none') {
             // Нет корней — Ци недоступен (пока нет искусственного корня)
             if (!char.artificialRoot) return;
         }
@@ -229,7 +229,7 @@ const WorldEngine = {
         // Скорость зависит от: корней + качества + множителей
         let speed = 1;
         if (path === 'qi') {
-            speed = (char.spirit_roots?.cultivationSpeed || 0.1) * (char.spirit_roots?.qualityMult || 1);
+            speed = (char.roots?.cultivationSpeed || 0.1) * (char.roots?.qualityMult || 1);
         } else if (path === 'body') {
             speed = 0.8; // Путь тела не зависит от корней
         } else if (path === 'spirit') {
@@ -296,7 +296,7 @@ const WorldEngine = {
         actions.push({ id: 'rest', label: '😴 Отдохнуть', description: 'Восстановить силы (1 день)' });
 
         // Культивация
-        if (char.spirit_roots?.type !== 'none' || char.artificialRoot) {
+        if (char.roots?.type !== 'none' || char.artificialRoot) {
             actions.push({ id: 'meditate', label: '🧘 Медитировать (Ци)', description: 'Культивировать ци (1 день)' });
             actions.push({ id: 'meditate_week', label: '🧘‍♂️ Затворничество (Ци)', description: 'Глубокая медитация (7 дней)' });
         }

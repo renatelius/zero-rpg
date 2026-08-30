@@ -261,7 +261,7 @@ const Sects = {
         
         if (age < req.minAge) return { can: false, reason: `Слишком молод (мин. ${req.minAge} лет)` };
         if (age > req.maxAge) return { can: false, reason: `Слишком стар (макс. ${req.maxAge} лет)` };
-        if (req.roots && char.spiritRoots?.type === 'none') return { can: false, reason: 'Нужны духовные корни' };
+        if (req.roots && char.roots?.type === 'none') return { can: false, reason: 'Нужны духовные корни' };
         
         // Проверка стат
         for (const [stat, min] of Object.entries(req.minStat || {})) {

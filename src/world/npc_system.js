@@ -46,9 +46,9 @@ const NPCSystem = {
         GameState.data.world.npcIdCounter = id;
 
         // Генерируем как игрока
-        const roots = SpiritRoots.generate();
-        const origin = Origin.generate();
-        const physique = PhysiqueGen.generate();
+        const roots = generateSpiritRoots();
+        const origin = generateOrigin();
+        const physique = generatePhysique();
 
         // Текущий ранг (зависит от возраста и корней)
         let rank = 0;
