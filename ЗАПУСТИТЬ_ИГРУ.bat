@@ -9,5 +9,5 @@ echo     ╚══════════════════════�
 echo.
 echo  Открываю игру в браузере...
 echo.
-start "" "%~dp0play.html"
+start "" "%~dp0index.html"
 exit

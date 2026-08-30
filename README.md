@@ -107,9 +107,8 @@ GameState (src/state.js) holds all mutable state and saves it to localStorage.
 | --- | --- |
 | `css/` | `main.css`, `eastern-theme.css`, `combat.css`, `graphics.css`, `crafting.css`, `techniques.css` |
 | `assets/` | `backgrounds/`, `portraits/`, `icons/` (elements), `ui/` decorations |
-| `data/chapter1/` | Legacy hand-written Chapter 1 scenes (3 arcs, 50+ scenes). Currently **not loaded** — the `<script>` tags in `index.html` are commented out in favour of the generated living-world events |
-| `play.html` | Older monolithic single-file demo, kept for reference |
-| `test_*.html` | Ad-hoc debug harnesses for module loading and isolated systems |
+| `legacy/chapter1/` | Hand-written Chapter 1 scenes (3 arcs, 50+ scenes), archived. **Not loaded** — the `<script>` tags in `index.html` are commented out in favour of the generated living-world events |
+| `legacy/play.html` | Older monolithic single-file demo, archived for reference |
 
 ## Development notes
 

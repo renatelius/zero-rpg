@@ -7,4 +7,10 @@ Desktop.ini
 .vscode/
 .idea/
 *.log
+*.swp
+*~
+*.bak
 node_modules/
+# Amazon Quick bridge
+.quick/
+
