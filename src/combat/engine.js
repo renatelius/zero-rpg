@@ -44,6 +44,9 @@ const CombatEngine = {
                 techniques: player.techniques || [],
                 trumpCard: player.trumpCard || null,
                 consumables: player.consumables ? [...player.consumables] : [],
+                formations: (typeof Formation !== 'undefined' && Formation.collectFormations)
+                    ? Formation.collectFormations(player)
+                    : (player.inventory || []).filter(i => i && i.type === 'formation'),
                 defending: false,
                 dao_heart: player.dao_heart || 50
             },
@@ -51,6 +54,7 @@ const CombatEngine = {
             tension: 0,
             round: 0,
             log: [],
+            activeFormations: [],
             lastDamageToPlayer: 0,
             lastDamageToEnemy: 0,
             config: config,
@@ -83,6 +87,12 @@ const CombatEngine = {
 
         // Записать в лог
         this.state.log.push({ round: this.state.round, side: 'player', result });
+
+        // Бонус исходящего урона от активных формаций
+        if (result.damage > 0 && typeof Formation !== 'undefined' && Formation.getOutgoingMultiplier) {
+            const mult = Formation.getOutgoingMultiplier(this.state);
+            if (mult !== 1) result.damage = Math.round(result.damage * mult);
+        }
 
         // Применить урон к врагу
         if (result.damage > 0) {
@@ -122,6 +132,16 @@ const CombatEngine = {
 
         const enemyResult = EnemyTemplates.chooseEnemyAction(this.state.enemy, this.state);
 
+        // Активные формации: снижение/отражение/уклонение
+        if (typeof Formation !== 'undefined' && Formation.modifyIncomingDamage) {
+            const mod = Formation.modifyIncomingDamage(this.state, enemyResult.damage || 0, enemyResult);
+            enemyResult.damage = mod.damage;
+            if (mod.reflected > 0) this.state.enemy.hp -= mod.reflected;
+            if (mod.messages.length > 0) {
+                enemyResult.narration = `${enemyResult.narration || ''}\n${mod.messages.join(' ')}`;
+            }
+        }
+
         // Применить урон к игроку
         if (enemyResult.damage > 0) {
             this.state.player.hp -= enemyResult.damage;
@@ -133,6 +153,15 @@ const CombatEngine = {
 
         // Рендер действия врага
         this.renderEnemyAction(enemyResult);
+
+        // Тик формаций: периодические эффекты и отсчёт длительности
+        this.tickFormations();
+
+        // Проверить победу (урон формаций/отражение могли добить врага)
+        if (this.state.enemy.hp <= 0) {
+            this.endCombat('victory');
+            return;
+        }
 
         // Проверить поражение
         if (this.state.player.hp <= 0) {
@@ -151,6 +180,35 @@ const CombatEngine = {
 
         // Показать новые действия
         setTimeout(() => this.renderNewTurn(), 600);
+    },
+
+    /**
+     * Тик активных формаций (урон/лечение/регенерация Ци + длительность)
+     */
+    tickFormations() {
+        if (typeof Formation === 'undefined' || !Formation.tick) return;
+        if (!this.state || !Array.isArray(this.state.activeFormations)) return;
+        if (this.state.activeFormations.length === 0) return;
+
+        const tickResult = Formation.tick(this.state);
+
+        if (tickResult.damageToEnemy > 0 && this.state.enemy) {
+            this.state.enemy.hp -= tickResult.damageToEnemy;
+            this.state.lastDamageToEnemy = tickResult.damageToEnemy;
+        }
+
+        if (tickResult.messages.length > 0) {
+            this.state.log.push({
+                round: this.state.round, side: 'formation',
+                result: { type: 'formation', damage: tickResult.damageToEnemy, narration: tickResult.messages.join(' ') }
+            });
+            const log = document.getElementById('combat-log');
+            if (log) {
+                log.innerHTML += `<div class="combat-entry formation-action"><span class="action-text">${tickResult.messages.join('<br>')}</span></div>`;
+                log.scrollTop = log.scrollHeight;
+            }
+            this.updateBars();
+        }
     },
 
     /**

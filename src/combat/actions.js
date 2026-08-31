@@ -39,13 +39,17 @@ const CombatActions = {
             actions.push(this.createFleeAction(state));
         }
 
-        // 6. Расходник — если есть в инвентаре
+        // 6. Формация — если есть свиток и достаточно Ци
+        const formationAction = this.createFormationAction(state);
+        if (formationAction) actions.push(formationAction);
+
+        // 7. Расходник — если есть в инвентаре
         if (player.consumables && player.consumables.length > 0) {
             actions.push(this.createConsumableAction(state));
         }
 
-        // Ограничить до 4 действий (самые релевантные)
-        return actions.slice(0, 4);
+        // Ограничить до 5 действий (самые релевантные)
+        return actions.slice(0, 5);
     },
 
     // === СОЗДАНИЕ ДЕЙСТВИЙ ===
@@ -115,6 +119,32 @@ const CombatActions = {
             type: 'flee',
             cost: null,
             execute: () => this.executeFlee(state, chance)
+        };
+    },
+
+    createFormationAction(state) {
+        if (typeof Formation === 'undefined' || !Formation.deploy) return null;
+
+        const list = state.player?.formations || [];
+        if (list.length === 0) return null;
+
+        const activeIds = (state.activeFormations || []).map(a => a.id);
+        const item = list.find(f => {
+            if (!f) return false;
+            if (activeIds.indexOf(f.baseId || f.id) > -1) return false;
+            return Formation.getQiCost(f) <= (state.player.qi || 0);
+        });
+        if (!item) return null;
+
+        const qiCost = Formation.getQiCost(item);
+        return {
+            id: 'formation',
+            name: `🔷 ${item.cn ? item.cn + ' ' : ''}${item.name}`,
+            description: `${item.description || 'Развернуть формацию'} [Ци: -${qiCost}]`,
+            type: 'formation',
+            cost: { qi: qiCost },
+            formation: item,
+            execute: () => this.executeFormation(state, item)
         };
     },
 
@@ -248,6 +278,30 @@ const CombatActions = {
                 enemyBonus: 1.3 // Враг бьёт сильнее при провале побега
             };
         }
+    },
+
+    executeFormation(state, item) {
+        const result = Formation.deploy(state, item);
+
+        if (!result.success) {
+            return {
+                type: 'formation',
+                damage: 0,
+                narration: `🔷 ${result.message || 'Формацию не удалось развернуть'}.`,
+                elementInteraction: null
+            };
+        }
+
+        const active = result.active || {};
+        return {
+            type: 'formation',
+            damage: 0,
+            formation: active,
+            qiSpent: result.qiSpent || 0,
+            narration: `🔷 ${state.player.name} разворачивает «${active.name}»! `
+                + `${active.effect?.duration || active.duration || 0} ходов силы массива. [Ци: -${result.qiSpent || 0}]`,
+            elementInteraction: null
+        };
     },
 
     executeConsumable(state, item) {
