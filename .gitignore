@@ -13,4 +13,6 @@ Desktop.ini
 node_modules/
 # Amazon Quick bridge
 .quick/
+# Kiro CLI local config
+.kiro/
 

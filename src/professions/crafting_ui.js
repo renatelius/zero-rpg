@@ -238,6 +238,8 @@ const CraftingUI = {
         if (profId === 'alchemist') result = Alchemy.craft(char, recipeId);
         else if (profId === 'smith') result = Smithing.craft(char, recipeId);
         else if (profId === 'talisman_master') result = Talismans.craft(char, recipeId);
+        else if (profId === 'herbalist') result = Herbalism.craft(char, recipeId);
+        else if (profId === 'formation_master') result = Formation.craft(char, recipeId);
         else return;
 
         this.showMessage(result.message);
@@ -319,6 +321,8 @@ const CraftingUI = {
         if (profId === 'alchemist') return Alchemy.getAvailableRecipes(char);
         if (profId === 'smith') return Smithing.getAvailableRecipes(char);
         if (profId === 'talisman_master') return Talismans.getAvailableRecipes(char);
+        if (profId === 'herbalist') return Herbalism.getAvailableRecipes(char);
+        if (profId === 'formation_master') return Formation.getAvailableRecipes(char);
         return [];
     },
 
@@ -326,10 +330,13 @@ const CraftingUI = {
         if (profId === 'alchemist') return Alchemy.canCraft(char, recipeId);
         if (profId === 'smith') return Smithing.canCraft(char, recipeId);
         if (profId === 'talisman_master') return Talismans.canCraft(char, recipeId);
+        if (profId === 'herbalist') return Herbalism.canCraft(char, recipeId);
+        if (profId === 'formation_master') return Formation.canCraft(char, recipeId);
         return false;
     },
 
     getIngredientName(id) {
-        return Alchemy.INGREDIENTS[id]?.name || Smithing.MATERIALS[id]?.name || Talismans.MATERIALS[id]?.name || id;
+        return Alchemy.INGREDIENTS[id]?.name || Smithing.MATERIALS[id]?.name || Talismans.MATERIALS[id]?.name
+            || Herbalism.MATERIALS[id]?.name || Formation.MATERIALS[id]?.name || id;
     }
 };
